@@ -6,14 +6,33 @@ import cv2
 import torchvision.models.segmentation
 import torch
 import os
-# import torch_directml
+import torch
+import torch_directml
 # dml = torch_directml.device()
 
 batchSize=2
 imageSize=[600,600]
-device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')   # train on the GPU or on the CPU, if a GPU is not available
-# device = torch_directml.device()
+# device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')   # train on the GPU or on the CPU, if a GPU is not available
+device = torch_directml.device()
+print("----------------------------------")
+# print(torch.backends.context.backend)
+# print(torch.backends.backend)
+print(device)
+# print(torch.device('cuda'));
+# print(torch.device('opencl'));
+# print(torch.cuda.is_available());
+# print(torch.opencl.is_available());
+print("-----------------======================")
+# exit()
+
 trainDir="./LabPics Medical/Train"
+checkpointDir="./checkpoints/"
+lastStateFilePath = checkpointDir+"last.torch"
+lastModelState = checkpointDir+"last_model.torch"
+epoch = 1
+# LOSS = 0.4
+loadLast = True
+
 
 imgs=[]
 for pth in os.listdir(trainDir):
@@ -56,9 +75,27 @@ model.roi_heads.box_predictor = FastRCNNPredictor(in_features,num_classes=2)  # 
 model.to(device)# move model to the right devic
 
 optimizer = torch.optim.AdamW(params=model.parameters(), lr=1e-5)
+
+print("-----------Continue previous?----------------")
+print("Should load? " + str(loadLast))
+if(loadLast):
+    # print("loading lastModelState: " + lastModelState)
+    # checkpoint = torch.load(lastModelState)
+    # model.load_state_dict(checkpoint)
+    # epoch = 9001
+
+    print("loading lastStateFilePath: " + lastStateFilePath)
+    checkpoint = torch.load(lastStateFilePath)
+    model.load_state_dict(checkpoint['model_state_dict'])
+    optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+    epoch = 1 + int(checkpoint['epoch'])
+    lossLast = checkpoint['loss']
+    print('load epoch: ' + str(epoch))
+print("-----------TRAIN----------------")
+
 model.train()
 
-for i in range(10001):
+for i in range(epoch, 10001):
             images, targets = loadData()
             images = list(image.to(device) for image in images)
             targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
@@ -71,4 +108,14 @@ for i in range(10001):
             optimizer.step()
             print(i,'loss:', losses.item())
             if i%500==0:
-                torch.save(model.state_dict(), str(i)+".torch")
+                torch.save(model.state_dict(), checkpointDir+str(i)+".torch")
+                # torch.save(model.state_dict(), lastModelState)
+                print("save epoch: "+ str(i))
+                torch.save({
+                    'epoch': str(i),
+                    'model_state_dict': model.state_dict(),
+                    'optimizer_state_dict': optimizer.state_dict(),
+                    'loss': losses.item(),
+                    }, lastStateFilePath)
+
+

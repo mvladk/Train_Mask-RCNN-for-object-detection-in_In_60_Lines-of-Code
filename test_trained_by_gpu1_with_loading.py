@@ -4,20 +4,38 @@ import numpy as np
 import cv2
 import torchvision.models.segmentation
 import torch
+import torch_directml
+
 imageSize=[600,600]
 imgPath="Image.jpg"
 
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')   # train on the GPU or on the CPU, if a GPU is not available
+# device = torch_directml.device()
+print(device)
 # model = torchvision.models.detection.maskrcnn_resnet50_fpn(pretrained=True)  # load an instance segmentation model pre-trained pre-trained on COCO
+# weights=MaskRCNN_ResNet50_FPN_Weights.COCO_V1
+# weights='MaskRCNN_ResNet50_FPN_Weights.DEFAULT'
 model = torchvision.models.detection.maskrcnn_resnet50_fpn(weights='MaskRCNN_ResNet50_FPN_Weights.COCO_V1')  # load an instance segmentation model pre-trained pre-trained on COCO
 in_features = model.roi_heads.box_predictor.cls_score.in_features  # get number of input features for the classifier
 model.roi_heads.box_predictor = FastRCNNPredictor(in_features,num_classes=2)  # replace the pre-trained head with a new one
+
 checkpointDir="./checkpoints/"
+# lastStateFilePath = checkpointDir+"last_model.torch"
 lastStateFilePath = checkpointDir+"last.torch"
+
 print("loading lastStateFilePath: " + lastStateFilePath)
 checkpoint = torch.load(lastStateFilePath, map_location=device)
 model.load_state_dict(checkpoint['model_state_dict'])
+# model.load_state_dict(checkpoint)
+# model.load_state_dict(checkpoint['model_state_dict'], map_location=device)
+# optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+# epoch = 1 + int(checkpoint['epoch'])
+# lossLast = checkpoint['loss']
+# print('load epoch: ' + str(epoch))
 # model.load_state_dict(torch.load("10000.torch"))
+# model.load_state_dict(torch.load("10000.torch"))
+
+
 model.to(device)# move model to the right devic
 model.eval()
 
@@ -29,6 +47,8 @@ images = list(image.to(device) for image in images)
 
 with torch.no_grad():
     pred = model(images)
+
+# print(pred)
 
 im= images[0].swapaxes(0, 2).swapaxes(0, 1).detach().cpu().numpy().astype(np.uint8)
 im2 = im.copy()

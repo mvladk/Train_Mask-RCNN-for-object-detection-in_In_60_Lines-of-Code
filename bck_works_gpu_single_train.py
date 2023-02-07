@@ -6,13 +6,25 @@ import cv2
 import torchvision.models.segmentation
 import torch
 import os
-# import torch_directml
+import torch
+import torch_directml
 # dml = torch_directml.device()
 
 batchSize=2
 imageSize=[600,600]
-device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')   # train on the GPU or on the CPU, if a GPU is not available
-# device = torch_directml.device()
+# device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')   # train on the GPU or on the CPU, if a GPU is not available
+device = torch_directml.device()
+print("----------------------------------")
+# print(torch.backends.context.backend)
+# print(torch.backends.backend)
+print(device)
+# print(torch.device('cuda'));
+# print(torch.device('opencl'));
+# print(torch.cuda.is_available());
+# print(torch.opencl.is_available());
+print("-----------------======================")
+# exit()
+
 trainDir="./LabPics Medical/Train"
 
 imgs=[]
