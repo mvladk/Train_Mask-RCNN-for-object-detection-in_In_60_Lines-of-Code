@@ -36,7 +36,7 @@ lastStateFilePath = checkpointDir+"last.torch"
 lastModelState = checkpointDir+"last_model.torch"
 epoch = 1
 # LOSS = 0.4
-loadLast = False
+loadLast = True
 
 h5_file_name = "../fonts/SynthText_train.h5"
 db = h5py.File(h5_file_name, 'r')
@@ -124,7 +124,7 @@ def loadData():
         fonts_filtered = []
         for i in range(num_objs):
             x,y,w,h = cv2.boundingRect(masks[i])
-            if h == 0 or h < 5 or w == 0 or w < 5:
+            if h == 0 or h < 10 or w == 0 or w < 10:
                 continue
             masks_filtered.append(masks[i])
             fonts_filtered.append(fonts[i])
@@ -165,9 +165,9 @@ def loadData():
         
         maped_labels = [maped_font[f] for f in fonts_filtered ]
 
-        print(f"masks_filtered {len(masks_filtered)}")
-        print(f"boxes {len(boxes)}")
-        print(f"maped_labels {len(maped_labels)}")
+        # print(f"masks_filtered {len(masks_filtered)}")
+        # print(f"boxes {len(boxes)}")
+        # print(f"maped_labels {len(maped_labels)}")
         # exit()
 
         data["labels"] = torch.as_tensor(maped_labels, dtype=torch.int64)
@@ -195,7 +195,7 @@ def loadData():
     batch_Imgs = batch_Imgs.swapaxes(1, 3).swapaxes(2, 3)
     return batch_Imgs, batch_Data
 
-model = torchvision.models.detection.maskrcnn_resnet50_fpn(pretrained=True)  # load an instance segmentation model pre-trained pre-trained on COCO
+model = torchvision.models.detection.maskrcnn_resnet50_fpn(weights='MaskRCNN_ResNet50_FPN_Weights.COCO_V1')  # load an instance segmentation model pre-trained pre-trained on COCO
 in_features = model.roi_heads.box_predictor.cls_score.in_features  # get number of input features for the classifier
 model.roi_heads.box_predictor = FastRCNNPredictor(in_features,num_classes=5)  # replace the pre-trained head with a new one
 model.to(device)# move model to the right devic
@@ -221,30 +221,42 @@ print("-----------TRAIN----------------")
 
 model.train()
 
-saveEveryIterations = 100
+saveEveryIterations = 20
 maxIterations = 10001
 for i in range(epoch, maxIterations):
-            images, targets = loadData()
-            images = list(image.to(device) for image in images)
-            targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
+    images, targets = loadData()
+    images = list(image.to(device) for image in images)
+    targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
+    optimizer.zero_grad()
+    try:
+        loss_dict = model(images, targets)
+        losses = sum(loss for loss in loss_dict.values())
+        losses.backward()
+        optimizer.step()
+        print(i,'loss:', losses.item())
+        if i%500==0:
+            torch.save(model.state_dict(), checkpointDir+str(i)+".torch")
+            # torch.save(model.state_dict(), lastModelState)
+        if i%saveEveryIterations==0:
+            print("save epoch: "+ str(i))
+            torch.save({
+                'epoch': str(i),
+                'model_state_dict': model.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'loss': losses.item(),
+                }, lastStateFilePath)
+    except Exception as e:
+        # ... PRINT THE ERROR MESSAGE ... #
+        print(e)
+        print("-----------ERRR imgs----------------")
+        print(images)
+        print("-----------Targets:----------------")
+        print(targets)
+        print("-----------END----------------")
+        print("Something else went wrong")
+        exit()
+        # raise Exception(e)
 
-            optimizer.zero_grad()
-            loss_dict = model(images, targets)
 
-            losses = sum(loss for loss in loss_dict.values())
-            losses.backward()
-            optimizer.step()
-            print(i,'loss:', losses.item())
-            if i%500==0:
-                torch.save(model.state_dict(), checkpointDir+str(i)+".torch")
-                # torch.save(model.state_dict(), lastModelState)
-            if i%saveEveryIterations==0:
-                print("save epoch: "+ str(i))
-                torch.save({
-                    'epoch': str(i),
-                    'model_state_dict': model.state_dict(),
-                    'optimizer_state_dict': optimizer.state_dict(),
-                    'loss': losses.item(),
-                    }, lastStateFilePath)
 
 
