@@ -221,7 +221,7 @@ print("-----------TRAIN----------------")
 
 model.train()
 
-saveEveryIterations = 500
+saveEveryIterations = 100
 maxIterations = 10001
 for i in range(epoch, maxIterations):
             images, targets = loadData()
@@ -235,9 +235,10 @@ for i in range(epoch, maxIterations):
             losses.backward()
             optimizer.step()
             print(i,'loss:', losses.item())
-            if i%saveEveryIterations==0:
+            if i%500==0:
                 torch.save(model.state_dict(), checkpointDir+str(i)+".torch")
                 # torch.save(model.state_dict(), lastModelState)
+            if i%saveEveryIterations==0:
                 print("save epoch: "+ str(i))
                 torch.save({
                     'epoch': str(i),
