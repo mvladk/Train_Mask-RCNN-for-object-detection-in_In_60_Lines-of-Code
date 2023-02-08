@@ -201,15 +201,20 @@ def make_mask(image, points):
             erosion = cv2.erode(thresholded, kernel, iterations=1)
             # Copy the thresholded text to the empty image
             cropped_im[mask == filler] = erosion[mask == filler]
-
     except Exception as e:
         print("----small badaboom ----")
         print(e)
-        # try:
-        #     _, thresholded = cv2.threshold(np.uint16(masked_gray), 0, filler, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-        # except Exception as e2:
-        #     print("----big badaboom ----")
-        #     print(e2)
+        try:
+            _, thresholded = cv2.threshold(np.uint16(masked_gray), 0, filler, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+            if thresholded.any():
+                # Perform morphological operations to remove noise
+                kernel = np.ones((3,3), np.uint8)
+                erosion = cv2.erode(thresholded, kernel, iterations=1)
+                # Copy the thresholded text to the empty image
+                cropped_im[mask == filler] = erosion[mask == filler]
+        except Exception as e2:
+            print("----big badaboom ----")
+            print(e2)
 
     # Create an empty image with the same size as the grayscale image
 
