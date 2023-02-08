@@ -41,7 +41,7 @@ loadLast = True
 h5_file_name = "../fonts/SynthText_train.h5"
 db = h5py.File(h5_file_name, 'r')
 im_names = list(db['data'].keys())
-im_names = im_names[:600]
+im_names = im_names[:700]
 
 maped_font = {}
 maped_font[b'Alex Brush'] = 0
@@ -221,7 +221,7 @@ print("-----------TRAIN----------------")
 
 model.train()
 
-saveEveryIterations = 20
+saveEveryIterations = 300
 maxIterations = 10001
 for i in range(epoch, maxIterations):
     images, targets = loadData()

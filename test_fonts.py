@@ -7,7 +7,7 @@ import torch
 import torch_directml
 
 imageSize=[600,600]
-imgPath="fonts/images/baroque_8.jpg"
+imgPath="../fonts/images/baroque_8.jpg"
 
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')   # train on the GPU or on the CPU, if a GPU is not available
 # device = torch_directml.device()
@@ -17,15 +17,17 @@ print(device)
 # weights='MaskRCNN_ResNet50_FPN_Weights.DEFAULT'
 model = torchvision.models.detection.maskrcnn_resnet50_fpn(weights='MaskRCNN_ResNet50_FPN_Weights.COCO_V1')  # load an instance segmentation model pre-trained pre-trained on COCO
 in_features = model.roi_heads.box_predictor.cls_score.in_features  # get number of input features for the classifier
-model.roi_heads.box_predictor = FastRCNNPredictor(in_features,num_classes=2)  # replace the pre-trained head with a new one
+model.roi_heads.box_predictor = FastRCNNPredictor(in_features,num_classes=5)  # replace the pre-trained head with a new one
 
 checkpointDir="./checkpoints/"
 # lastStateFilePath = checkpointDir+"last_model.torch"
 lastStateFilePath = checkpointDir+"last.torch"
+lastFilePath = checkpointDir+"4000.torch"
 
 print("loading lastStateFilePath: " + lastStateFilePath)
 checkpoint = torch.load(lastStateFilePath, map_location=device)
-model.load_state_dict(checkpoint['model_state_dict'])
+model.load_state_dict(checkpoint['model_state_dict'], strict=False)
+# model.load_state_dict(torch.load(lastFilePath, map_location=device), strict=False)
 # model.load_state_dict(checkpoint)
 # model.load_state_dict(checkpoint['model_state_dict'], map_location=device)
 # optimizer.load_state_dict(checkpoint['optimizer_state_dict'])

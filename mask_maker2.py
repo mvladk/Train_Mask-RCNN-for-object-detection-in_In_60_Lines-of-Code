@@ -179,6 +179,8 @@ def make_mask(image, points):
     #     print(e)
     # Convert the image to grayscale
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    # Normalize https://stackoverflow.com/questions/46260601/convert-image-from-cv-64f-to-cv-8u
+    gray = np.uint16(gray)
     # Define the polygon vertices
     points_np = np.array(points, np.int32)
     # Create a mask image
