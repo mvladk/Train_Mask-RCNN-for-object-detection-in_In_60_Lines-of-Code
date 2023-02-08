@@ -20,15 +20,15 @@ batchSize=3
 # batchSize=2
 imageSize=[600,600]
 # device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')   # train on the GPU or on the CPU, if a GPU is not available
-# device = torch_directml.device()
 device = torch_directml.device(1)
-# print(device)
-# print(device1)
+deviceGPU0 = torch_directml.device()
+print(device)
+print(deviceGPU0)
 # exit()
 print("----------------------------------")
 # print(torch.backends.context.backend)
 # print(torch.backends.backend)
-print(device)
+# print(device)
 # print(torch.device('cuda'));
 # print(torch.device('opencl'));
 # print(torch.cuda.is_available());
@@ -255,10 +255,11 @@ for i in range(epoch, maxIterations):
         # ... PRINT THE ERROR MESSAGE ... #
         print(e)
         print("-----------ERRR imgs----------------")
-        print(images)
-        print("-----------Targets:----------------")
-        print(targets)
-        print("-----------END----------------")
+        print(f"images: {len(images)}")
+        # print("-----------Targets:----------------")
+        print(f"targets: {len(targets)}")
+        # print(targets)
+        # print("-----------END----------------")
         print("-----Something else went wrong-----")
         # exit()
         # raise Exception(e)
