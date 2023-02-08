@@ -253,8 +253,8 @@ for i in range(epoch, maxIterations):
         print("-----------Targets:----------------")
         print(targets)
         print("-----------END----------------")
-        print("Something else went wrong")
-        exit()
+        print("-----Something else went wrong-----")
+        # exit()
         # raise Exception(e)
 
 

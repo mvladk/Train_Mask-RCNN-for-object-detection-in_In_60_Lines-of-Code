@@ -173,7 +173,10 @@ def make_mask(image, points):
         # points = [(10, 10), (100, 10), (100, 100), (10, 100)]
 
         # Create a mask image
-    im_pil = Image.fromarray(image)
+    # try:
+    #     im_pil = Image.fromarray(image)
+    # except Exception as e:
+    #     print(e)
     # Convert the image to grayscale
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     # Define the polygon vertices
