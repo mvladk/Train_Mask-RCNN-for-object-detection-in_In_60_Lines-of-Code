@@ -7,7 +7,9 @@ import torch
 import torch_directml
 
 imageSize=[600,600]
-imgPath="../fonts/images/baroque_8.jpg"
+# imgPath="../fonts/images/baroque_8.jpg"
+imgPath="./image_test_font.jpg"
+
 
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')   # train on the GPU or on the CPU, if a GPU is not available
 # device = torch_directml.device()
