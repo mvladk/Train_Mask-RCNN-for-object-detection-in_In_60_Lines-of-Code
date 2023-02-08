@@ -180,7 +180,7 @@ def make_mask(image, points):
     # Convert the image to grayscale
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     # Normalize https://stackoverflow.com/questions/46260601/convert-image-from-cv-64f-to-cv-8u
-    gray = np.uint16(gray)
+    # gray = np.uint16(gray)
     # Define the polygon vertices
     points_np = np.array(points, np.int32)
     # Create a mask image
@@ -192,11 +192,20 @@ def make_mask(image, points):
     masked_gray = cv2.bitwise_and(gray, gray, mask=mask)
 
     # Threshold the masked grayscale image
-    _, thresholded = cv2.threshold(masked_gray, 0, filler, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    try:
+        _, thresholded = cv2.threshold(masked_gray, 0, filler, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    except Exception as e:
+        print("----small badaboom ----")
+        print(e)
+        try:
+            _, thresholded = cv2.threshold(np.uint16(masked_gray), 0, filler, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+        except Exception as e2:
+            print("----big badaboom ----")
+            print(e2)
 
     # Perform morphological operations to remove noise
     kernel = np.ones((3,3), np.uint8)
-    erosion = cv2.erode(thresholded, kernel, iterations=3)
+    erosion = cv2.erode(thresholded, kernel, iterations=1)
 
     # Create an empty image with the same size as the grayscale image
     cropped_im = np.zeros(gray.shape, np.uint8)

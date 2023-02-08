@@ -14,10 +14,17 @@ import h5py
 from mask_maker2 import make_mask
 # dml = torch_directml.device()
 
-batchSize=2
+loadLast = False
+
+batchSize=3
+# batchSize=2
 imageSize=[600,600]
 # device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')   # train on the GPU or on the CPU, if a GPU is not available
-device = torch_directml.device()
+# device = torch_directml.device()
+device = torch_directml.device(1)
+# print(device)
+# print(device1)
+# exit()
 print("----------------------------------")
 # print(torch.backends.context.backend)
 # print(torch.backends.backend)
@@ -36,12 +43,11 @@ lastStateFilePath = checkpointDir+"last.torch"
 lastModelState = checkpointDir+"last_model.torch"
 epoch = 1
 # LOSS = 0.4
-loadLast = True
 
 h5_file_name = "../fonts/SynthText_train.h5"
 db = h5py.File(h5_file_name, 'r')
 im_names = list(db['data'].keys())
-im_names = im_names[:700]
+im_names = im_names[:800]
 
 maped_font = {}
 maped_font[b'Alex Brush'] = 0
@@ -221,7 +227,7 @@ print("-----------TRAIN----------------")
 
 model.train()
 
-saveEveryIterations = 300
+saveEveryIterations = 500
 maxIterations = 10001
 for i in range(epoch, maxIterations):
     images, targets = loadData()
