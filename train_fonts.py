@@ -14,16 +14,16 @@ import h5py
 from mask_maker2 import make_mask
 # dml = torch_directml.device()
 
-loadLast = False
+loadLast = True
 
 batchSize=3
 # batchSize=2
 imageSize=[600,600]
 # device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')   # train on the GPU or on the CPU, if a GPU is not available
-device = torch_directml.device(1)
-deviceGPU0 = torch_directml.device()
+device = torch_directml.device()
+# deviceGPU0 = torch_directml.device()
 print(device)
-print(deviceGPU0)
+# print(deviceGPU0)
 # exit()
 print("----------------------------------")
 # print(torch.backends.context.backend)
@@ -101,12 +101,12 @@ def loadData():
         for boxId in range(fonts_num):
             # vesMask = (cv2.imread(maskDir+'/'+mskName, 0) > 0).astype(np.uint8)  # Read vesse instance mask
             points = [
-                [int(charBB[xId][0][boxId]), int(charBB[yId][0][boxId])],
-                    [int(charBB[xId][1][boxId]), int(charBB[yId][1][boxId])], 
-                [int(charBB[xId][2][boxId]), int(charBB[yId][2][boxId])], 
-                    [int(charBB[xId][3][boxId]), int(charBB[yId][3][boxId] )]
+                [int(max(0, charBB[xId][0][boxId])), int(max(0,charBB[yId][0][boxId]))],
+                    [int(max(0,charBB[xId][1][boxId])), int(max(0,charBB[yId][1][boxId]))], 
+                [int(max(0,charBB[xId][2][boxId])), int(max(0,charBB[yId][2][boxId]))], 
+                    [int(max(0,charBB[xId][3][boxId])), int(max(0,charBB[yId][3][boxId] ))]
                 ]
-            vesMask = make_mask(img, points).astype(np.uint8)
+            vesMask = make_mask(img, points, im).astype(np.uint8)
             img = cv2.resize(img, imageSize, cv2.INTER_LINEAR)
             vesMask=cv2.resize(vesMask,imageSize,cv2.INTER_NEAREST)
             # print(im)
@@ -130,7 +130,7 @@ def loadData():
         fonts_filtered = []
         for i in range(num_objs):
             x,y,w,h = cv2.boundingRect(masks[i])
-            if h == 0 or h < 10 or w == 0 or w < 10:
+            if h == 0 or h < 10 or w == 0 or w < 10 or 0 > x or 0 > y:
                 continue
             masks_filtered.append(masks[i])
             fonts_filtered.append(fonts[i])
@@ -146,7 +146,9 @@ def loadData():
         
 
         num_objs_filtered = len(masks_filtered)
-        if num_objs_filtered==0: return loadData() # if image have no objects just load another image
+        # print(f"um_objs_filtered: {num_objs_filtered}" )
+
+        if num_objs_filtered==0 or num_objs_filtered==1 : return loadData() # if image have no objects just load another image
         boxes = torch.zeros([num_objs_filtered,4], dtype=torch.float32)
         # masks_filtered = []
         for i in range(num_objs_filtered):
@@ -154,17 +156,18 @@ def loadData():
             boxes[i] = torch.tensor([x, y, x+w, y+h])
             # if h == 0 or w == 0:
             #     print("i: " + str(i))
-            #     print("im: " + str(im))
+            # print("im: " + str(im))
             #     cv2.imshow("img ", img)
             #     cv2.waitKey(0)
             #     # print(masks[i])
             #     print(x,y,w,h)
-        # print(boxes)
+            # print(boxes)
         # exit()
         # numpy.array( LIST )
         masks_tensor = torch.as_tensor(masks_filtered, dtype=torch.uint8)
         img = torch.as_tensor(img, dtype=torch.float32)
         data = {}
+        # data["im_name"] =  im
         data["boxes"] =  boxes
         # num_objs_lll = len(boxes)
         # data["labels"] =  torch.ones((num_objs_lll,), dtype=torch.int64)   # there is only one class
@@ -227,7 +230,7 @@ print("-----------TRAIN----------------")
 
 model.train()
 
-saveEveryIterations = 500
+saveEveryIterations = 100
 maxIterations = 10001
 for i in range(epoch, maxIterations):
     images, targets = loadData()
@@ -239,7 +242,9 @@ for i in range(epoch, maxIterations):
         losses = sum(loss for loss in loss_dict.values())
         losses.backward()
         optimizer.step()
+        # print("-----------SLOSS----------------")
         print(i,'loss:', losses.item())
+        # print("-----------ELOSS----------------")
         if i%500==0:
             torch.save(model.state_dict(), checkpointDir+str(i)+".torch")
             # torch.save(model.state_dict(), lastModelState)
@@ -253,15 +258,38 @@ for i in range(epoch, maxIterations):
                 }, lastStateFilePath)
     except Exception as e:
         # ... PRINT THE ERROR MESSAGE ... #
-        print(e)
-        print("-----------ERRR imgs----------------")
-        print(f"images: {len(images)}")
-        # print("-----------Targets:----------------")
-        print(f"targets: {len(targets)}")
-        # print(targets)
-        # print("-----------END----------------")
-        print("-----Something else went wrong-----")
-        # exit()
+        # print(images)
+        # print("-----------SSSSS----------------")
+        # print(targets[0]['boxes'])
+        # print(targets[0]['labels'])
+        # print(f"masks: {len(targets[0]['masks'])}")
+        # print(f"boxes: {len(targets[0]['boxes'])}")
+        # print(f"labels: {len(targets[0]['labels'])}")
+        # print("-----------0end----------------")
+        # print(targets[1]['boxes'])
+        # print(targets[1]['labels'])
+        # print(f"masks: {len(targets[1]['masks'])}")
+        # print(f"boxes: {len(targets[1]['boxes'])}")
+        # print(f"labels: {len(targets[1]['labels'])}")
+        # print("-----------111end----------------")
+        # print(targets[2]['boxes'])
+        # print(targets[2]['labels'])
+        # print(f"masks: {len(targets[2]['masks'])}")
+        # print(f"boxes: {len(targets[2]['boxes'])}")
+        # print(f"labels: {len(targets[2]['labels'])}")
+        # print("-----------PPPPPP----------------")
+        # print(e)
+        # print("-----------ERRR imgs----------------")
+        # print(f"images: {len(images)}")
+        # # print("-----------Targets:----------------")
+        # print(f"targets: {len(targets)}")
+        
+        # # print("-----------END----------------")
+        print("-----Err: The parameter is incorrect. Do: ignore,skip :|-----")
+        # #     print("im: " + str(im))
+        # #     cv2.imshow("img ", img)
+        # #     cv2.waitKey(0)
+        # # exit()
         # raise Exception(e)
 
 

@@ -28,8 +28,8 @@ im_names = list(db['data'].keys())
 # im = im_names[0]
 # im = "maze_25.png_0"
 # img = cv2.imread("../fonts/images/maze_25.jpg")
-im = "city_99.jpg_0"
-# img = cv2.imread("../fonts/images/ant+hill_84.jpg")
+im = "ant+hill_84.jpg_0"
+img = cv2.imread("../fonts/images/ant+hill_84.jpg")
 
 # img = cv2.imread("../fonts/images/"+im)
 # img = cv2.imread("image_test_font.jpg")
@@ -49,12 +49,12 @@ points = [
         [int(db['data'][im].attrs['charBB'][xId][3][boxId]), int(db['data'][im].attrs['charBB'][yId][3][boxId] )]
     ]
 
-# points_abla = [
-#         (int(db['data'][im].attrs['charBB'][xId][0][boxId]), int(db['data'][im].attrs['charBB'][yId][0][boxId])),
-#         (int(db['data'][im].attrs['charBB'][xId][1][boxId]), int(db['data'][im].attrs['charBB'][yId][1][boxId])), 
-#         (int(db['data'][im].attrs['charBB'][xId][2][boxId]), int(db['data'][im].attrs['charBB'][yId][2][boxId])), 
-#         (int(db['data'][im].attrs['charBB'][xId][3][boxId]), int(db['data'][im].attrs['charBB'][yId][3][boxId]))
-# ]
+points_abla = [
+        (int(db['data'][im].attrs['charBB'][xId][0][boxId]), int(db['data'][im].attrs['charBB'][yId][0][boxId])),
+        (int(db['data'][im].attrs['charBB'][xId][1][boxId]), int(db['data'][im].attrs['charBB'][yId][1][boxId])), 
+        (int(db['data'][im].attrs['charBB'][xId][2][boxId]), int(db['data'][im].attrs['charBB'][yId][2][boxId])), 
+        (int(db['data'][im].attrs['charBB'][xId][3][boxId]), int(db['data'][im].attrs['charBB'][yId][3][boxId]))
+]
 
 
 # Open starting image and ensure RGB
@@ -288,8 +288,6 @@ def make_mask(image, points, im_name):
     # cv2.imshow("origin", image)
     # cv2.waitKey(0)
     # cv2.imshow("Mask Applied to Image", cropped_img)
-    # cv2.waitKey(0)
-    # cv2.imshow("cropped_im: ", cropped_im)
     # cv2.waitKey(0)
     return cropped_im
 

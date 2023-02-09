@@ -8,6 +8,7 @@ import torch_directml
 
 imageSize=[600,600]
 # imgPath="../fonts/images/baroque_8.jpg"
+# imgPath="../fonts/images/maze_25.png"
 imgPath="./image_test_font.jpg"
 
 
@@ -58,10 +59,16 @@ im= images[0].swapaxes(0, 2).swapaxes(0, 1).detach().cpu().numpy().astype(np.uin
 im2 = im.copy()
 for i in range(len(pred[0]['masks'])):
     msk=pred[0]['masks'][i,0].detach().cpu().numpy()
+    box=pred[0]['boxes'][i,0].detach().cpu().numpy()
     scr=pred[0]['scores'][i].detach().cpu().numpy()
-    if scr>0.8 :
+    if scr>0.12 :
         im2[:,:,0][msk>0.5] = random.randint(0,255)
         im2[:, :, 1][msk > 0.5] = random.randint(0,255)
         im2[:, :, 2][msk > 0.5] = random.randint(0, 255)
+        # im2[:,:,0][box>0.5] = random.randint(0,255)
+        # im2[:, :, 1][box > 0.5] = random.randint(0,255)
+        # im2[:, :, 2][box > 0.5] = random.randint(0, 255)
+        
+print(f"pred[0]: {pred[0]}")
 cv2.imshow(str(scr), np.hstack([im,im2]))
 cv2.waitKey()
