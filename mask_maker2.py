@@ -379,7 +379,7 @@ def make_mask(image, points, im_name):
     # points_np = np.array(points, np.int32)
     # Create a mask image
     mask_canvas_result = np.zeros(filteredImageBitwiseMaxMin.shape, np.uint8)
-    filler = 255
+    filler = 1
     cv2.fillPoly(mask_canvas_result, [points_np], filler)
     cropped_im = cv2.bitwise_and(filteredImageBitwiseMaxMin, filteredImageBitwiseMaxMin, mask=mask_canvas_result)
     cropped_im[cropped_im < 60] = 0
