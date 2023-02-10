@@ -17,7 +17,7 @@ imgPath="./image_test_font.jpg"
 
 
 device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')   # train on the GPU or on the CPU, if a GPU is not available
-# device = torch_directml.device()
+# device = torch_directml.device(1)
 print(device)
 # model = torchvision.models.detection.maskrcnn_resnet50_fpn(pretrained=True)  # load an instance segmentation model pre-trained pre-trained on COCO
 # weights=MaskRCNN_ResNet50_FPN_Weights.COCO_V1
@@ -35,7 +35,10 @@ lastFilePath = checkpointDir+"4000.torch"
 
 print("loading lastStateFilePath: " + lastStateFilePath)
 checkpoint = torch.load(lastStateFilePath, map_location=device)
-model.load_state_dict(checkpoint['model_state_dict'], strict=False)
+# checkpoint = torch.load(lastStateFilePath, map_location={'privateuseone:1':'privateuseone:0'})
+
+# model.load_state_dict(checkpoint['model_state_dict'], strict=False)
+model.load_state_dict(checkpoint['model_state_dict'])
 # model.load_state_dict(torch.load(lastFilePath, map_location=device), strict=False)
 # model.load_state_dict(checkpoint)
 # model.load_state_dict(checkpoint['model_state_dict'], map_location=device)
@@ -63,7 +66,7 @@ with torch.no_grad():
 
 im= images[0].swapaxes(0, 2).swapaxes(0, 1).detach().cpu().numpy().astype(np.uint8)
 im2 = im.copy()
-accuracy_score = 0.17
+accuracy_score = 0.05
 for i in range(len(pred[0]['masks'])):
     msk=pred[0]['masks'][i,0].detach().cpu().numpy()
     box=pred[0]['boxes'][i,0].detach().cpu().numpy()
