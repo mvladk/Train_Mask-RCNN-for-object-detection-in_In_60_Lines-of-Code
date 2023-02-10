@@ -9,8 +9,8 @@ import torch_directml
 imageSize=[600,600]
 # imgPath="../fonts/images/baroque_8.jpg"
 # imgPath="../fonts/images/maze_25.png"
-imgPath="./image_test_font.jpg"
-# imgPath="./clothes_137_56.jpg"
+# imgPath="./image_test_font.jpg"
+imgPath="./clothes_137_56.jpg"
 # imgPath="./city_99.jpg"
 # imgPath="./aquarium_7_9.jpg"
 
@@ -31,7 +31,7 @@ model.roi_heads.box_predictor = FastRCNNPredictor(in_features,num_classes=5)  # 
 checkpointDir="./checkpoints/"
 # lastStateFilePath = checkpointDir+"last_model.torch"
 lastStateFilePath = checkpointDir+"last.torch"
-lastFilePath = checkpointDir+"4000.torch"
+lastFilePath = checkpointDir+"6500.torch"
 
 print("loading lastStateFilePath: " + lastStateFilePath)
 checkpoint = torch.load(lastStateFilePath, map_location=device)
@@ -66,26 +66,30 @@ with torch.no_grad():
 
 im= images[0].swapaxes(0, 2).swapaxes(0, 1).detach().cpu().numpy().astype(np.uint8)
 im2 = im.copy()
-accuracy_score = 0.05
+accuracy_score = 0.15
 for i in range(len(pred[0]['masks'])):
     msk=pred[0]['masks'][i,0].detach().cpu().numpy()
     box=pred[0]['boxes'][i,0].detach().cpu().numpy()
     scr=pred[0]['scores'][i].detach().cpu().numpy()
     
-    lbls=pred[0]['labels'][i].detach().cpu().numpy()
-    color = (lbls + 1) * 50
+    # lbls=pred[0]['labels'][i].detach().cpu().numpy()
+    # color = (lbls + 1) * 50
     # print(f"lbls: {lbls}")
     # print(f"color: {color}")
     # color = 255
     if scr > accuracy_score :
-        im2[:,:,0][msk>0.5] = color # random.randint(0,255)
-        im2[:, :, 1][msk > 0.5] = color # random.randint(0,255)
-        im2[:, :, 2][msk > 0.5] = color # random.randint(0,255)
+        # im2[:,:,0][msk>0.5] = color # random.randint(0,255)
+        # im2[:, :, 1][msk > 0.5] = color # random.randint(0,255)
+        # im2[:, :, 2][msk > 0.5] = color # random.randint(0,255)
+        im2[:,:,0][msk>0.5] = random.randint(0,255)
+        im2[:, :, 1][msk > 0.5] = random.randint(0,255)
+        im2[:, :, 2][msk > 0.5] = random.randint(0,255)
+
         # im2[:,:,0][box>0.5] = random.randint(0,255)
         # im2[:, :, 1][box > 0.5] = random.randint(0,255)
         # im2[:, :, 2][box > 0.5] = random.randint(0, 255)
         
-# print(f"pred[0]: {pred[0]}")
+print(f"pred[0]: {pred[0]}")
 cv2.imshow(str(scr), np.hstack([im,im2]))
 cv2.waitKey()
 cv2.destroyAllWindows()

@@ -16,7 +16,7 @@ from mask_maker2 import make_mask
 
 loadLast = True
 
-batchSize=3
+batchSize=2
 # batchSize=2
 imageSize=[600,600]
 # device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')   # train on the GPU or on the CPU, if a GPU is not available
@@ -47,7 +47,7 @@ epoch = 1
 h5_file_name = "../fonts/SynthText_train.h5"
 db = h5py.File(h5_file_name, 'r')
 im_names = list(db['data'].keys())
-im_names = im_names[:800]
+# im_names = im_names[:800]
 
 maped_font = {}
 maped_font[b'Alex Brush'] = 0
@@ -151,9 +151,15 @@ def loadData():
         if num_objs_filtered==0 or num_objs_filtered==1 : return loadData() # if image have no objects just load another image
         boxes = torch.zeros([num_objs_filtered,4], dtype=torch.float32)
         # masks_filtered = []
-        for i in range(num_objs_filtered):
-            x,y,w,h = cv2.boundingRect(masks_filtered[i])
-            boxes[i] = torch.tensor([x, y, x+w, y+h])
+        for boxId in range(num_objs_filtered):
+            # x,y,w,h = cv2.boundingRect(masks_filtered[boxId])
+            # boxes[boxId] = torch.tensor([x, y, x+w, y+h])
+
+            x_min = int(min(0, min(charBB[xId][0][boxId],charBB[xId][1][boxId],charBB[xId][2][boxId],charBB[xId][3][boxId])))
+            y_min = int(min(0, min(charBB[yId][0][boxId],charBB[yId][1][boxId],charBB[yId][2][boxId],charBB[yId][3][boxId])))
+            x_max = int(max(0, max(charBB[xId][0][boxId],charBB[xId][1][boxId],charBB[xId][2][boxId],charBB[xId][3][boxId])))
+            y_max = int(max(0, max(charBB[yId][0][boxId],charBB[yId][1][boxId],charBB[yId][2][boxId],charBB[yId][3][boxId])))
+            boxes[boxId] = torch.tensor([x_min, y_min, x_max, y_max])
             # if h == 0 or w == 0:
             #     print("i: " + str(i))
             # print("im: " + str(im))
@@ -225,6 +231,7 @@ if(loadLast):
     # epoch = 9001
 
     print("loading lastStateFilePath: " + lastStateFilePath)
+    # checkpoint = torch.load(lastStateFilePath, map_location=device)
     checkpoint = torch.load(lastStateFilePath)
     model.load_state_dict(checkpoint['model_state_dict'])
     optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
