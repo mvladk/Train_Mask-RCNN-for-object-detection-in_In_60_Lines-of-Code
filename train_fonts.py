@@ -205,11 +205,16 @@ def loadData():
     return batch_Imgs, batch_Data
 
 model = torchvision.models.detection.maskrcnn_resnet50_fpn(weights='MaskRCNN_ResNet50_FPN_Weights.COCO_V1')  # load an instance segmentation model pre-trained pre-trained on COCO
+# model = torchvision.models.detection.maskrcnn_resnet50_fpn(weights='MaskRCNN_ResNet50_FPN_Weights.COCO_V1')  # load an instance segmentation model pre-trained pre-trained on COCO
+# model = torchvision.models.detection.maskrcnn_resnet50_fpn(weights='MaskRCNN_ResNet50_FPN_V2_Weights.COCO_V1')  # load an instance segmentation model pre-trained pre-trained on COCO
+# model = torchvision.models.detection.resnet50(weights='ResNet50_Weights.IMAGENET1K_V2')
 in_features = model.roi_heads.box_predictor.cls_score.in_features  # get number of input features for the classifier
 model.roi_heads.box_predictor = FastRCNNPredictor(in_features,num_classes=5)  # replace the pre-trained head with a new one
 model.to(device)# move model to the right devic
 
 optimizer = torch.optim.AdamW(params=model.parameters(), lr=1e-5)
+# optimizer = torch.optim.AdamW(params=model.parameters(), lr=1e-6)
+
 
 print("-----------Continue previous?----------------")
 print("Should load? " + str(loadLast))
