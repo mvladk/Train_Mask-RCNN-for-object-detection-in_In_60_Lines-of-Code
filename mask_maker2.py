@@ -386,6 +386,7 @@ def make_mask(image, points, im_name):
     cropped_im[cropped_im >= 60] = filler
     # cv2.imshow("cropped_im: ", cropped_im)
     # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
     return cropped_im
 
 

@@ -88,3 +88,4 @@ for i in range(len(pred[0]['masks'])):
 # print(f"pred[0]: {pred[0]}")
 cv2.imshow(str(scr), np.hstack([im,im2]))
 cv2.waitKey()
+cv2.destroyAllWindows()
